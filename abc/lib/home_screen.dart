@@ -1,4 +1,5 @@
-import 'first_design.dart' ;
+import 'package:abc/first_design.dart';
+import 'package:abc/second_screen.dart';
 import 'package:flutter/material.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -7,14 +8,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 class _HomeScreenState extends State<HomeScreen> {
+  final _form=GlobalKey<FormState>();
   final TextEditingController firstNameController= TextEditingController();
   final TextEditingController emailController= TextEditingController();
   String country="nepal";
   String? gender;
   bool agree=false;
   bool ok=false;
-  double experience= 15;
-  double value=0;
+  double experience=10;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,8 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                   },
             ),
-
-            
              ListTile
              (
                   leading:Icon(Icons.newspaper),
@@ -116,93 +115,133 @@ class _HomeScreenState extends State<HomeScreen> {
           
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          spacing: 10,
-          children:[
-            TextFormField(
-              controller: firstNameController,
-              decoration: InputDecoration(
-                label: Text('frist name'),
-                hintText:'aarus rana',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(22),
-                )
+        padding: EdgeInsets.all(10),
+        child: Form(
+          key: _form,
+          child: Column(
+            spacing: 10,
+            children:[
+              TextFormField(
+                validator: (value){
+                  if (value==null||value.isEmpty){
+                  return "enter your full name";
+                  }
+                  if (  !value.trim().contains(" ")){
+                  return "enter your full name";
+                  }
+                  return null;
+                
+                },
+                controller: firstNameController,
+                decoration: InputDecoration(
+                  label: Text('Full Name'),
+                  hintText:'Firstname Lastname',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  )
+                ),
               ),
-            ),
-            TextFormField(
-              controller: emailController,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.email),
-                label: Text('email'),
-                hintText:'user@gmail.com',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(22),
-                )
+              TextFormField(
+                validator: (value){
+                  if(value==null || value.isEmpty){
+                    return"Please enter your email";
+                  }
+                  final emailex=RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if(!emailex.hasMatch(value)){
+                    return "please enter a valid email";
+                  }
+                  return null;
+                },
+                controller: emailController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.email),
+                  label: Text('email'),
+                  hintText:'user123@gmail.com',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  )
+                ),
               ),
-            ),
-            DropdownButtonFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder
+              DropdownButtonFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder
+                  (
+                    borderRadius: BorderRadius.circular(22),
+                  )
+                ),
+                items: ['Nepal' , 'India'].map(
+                  (coun)=> DropdownMenuItem(value :coun,child:Text(coun))
+                  ).toList(),
+               onChanged: (v){
+                setState(() {
+                  country =  v!;
+                  // v??country
+                });
+               }
+               ),
+               Text("gender"),
+               RadioGroup(
+                groupValue: gender,
+                onChanged: (v){
+                  setState(() {
+                    gender= v!;
+                  });
+                }, 
+                child: Row
                 (
-                  borderRadius: BorderRadius.circular(22),
+                  children: [
+                  Radio(value: "Male"),
+                  const Text('Male'),
+                  Radio(value: "female"),
+                  const Text('female'),
+                  ]
                 )
+                ),
+                CheckboxListTile(
+                title: Text('do you agree??'),
+                value: agree, 
+                onChanged: (v){
+                  setState(() {
+                    agree=v!;
+                  });
+                }
+                ),
+                SwitchListTile(
+                value: ok, 
+                title: Text('switch on the slide '),
+                onChanged: (bool v){
+                  setState(() {
+                    ok=v; }
+                );
+                }, 
+                secondary: Icon(Icons.lock_open_rounded),
+                
+                ),
+              Text('Experience: ${experience.toInt()} years'),
+              Slider(
+                value: experience,
+                min: 10,
+                max: 20,
+                divisions: 10,
+                label: experience.toInt().toString(),
+                onChanged: (v) {
+                  setState(() => experience = v);
+                },
               ),
-              items: ['Nepal' , 'India'].map(
-                (coun)=> DropdownMenuItem(value :coun,child:Text(coun))
-                ).toList(),
-             onChanged: (v){
-              setState(() {
-                country =  v!;
-                // v??country
-              });
-             }
-             ),
-             Text("gender"),
-             RadioGroup(
-              groupValue: gender,
-              onChanged: (v){
-                setState(() {
-                  gender= v!;
-                });
-              }, 
-              child: Row
-              (
-                children: [
-                Radio(value: "Male"),
-                const Text('Male'),
-                Radio(value: "female"),
-                const Text('female'),
-                ]
-              )
-              ),
-              CheckboxListTile(
-              title: Text('do you agree??'),
-              value: agree, 
-              onChanged: (v){
-                setState(() {
-                  agree=v!;
-                });
-              }
-              ),
-              SwitchListTile(
-              value: ok, 
-              title: Text('switch on the slide '),
-              onChanged: (bool v){
-                setState(() {
-                  ok=v; }
-              );
-              }, 
-              secondary: Icon(Icons.lock_open_rounded),
-              
-              ),
-              Slider(value: experience, onChanged: (value) {
-                setState(() {
-                  experience = value;
-                });
-              })
-          ]
-        )
+             ElevatedButton(
+              onPressed: () {
+                if (_form.currentState!.validate()) 
+                {
+                   var firstname= firstNameController.text;
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SecondScreen(firstName: firstname,),));
+                }
+  },
+  child: const Text('Press me'),
+)
+            ]
+          ),
+      
+        ),
       )
       );
   }
